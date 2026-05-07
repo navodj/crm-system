@@ -1,13 +1,24 @@
 from fastapi import FastAPI
+from app.database import engine
+from app import models
+from app.routes import leads
+from app.routes import notes
+from app.routes import dashboard
+from app.routes import auth
 
 app = FastAPI()
+app.include_router(notes.router)
+app.include_router(dashboard.router)
+app.include_router(auth.router)
 
+
+
+# ✅ create tables
+models.Base.metadata.create_all(bind=engine)
+
+# ✅ include routers AFTER app is defined
+app.include_router(leads.router)
 
 @app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
+def root():
+    return {"message": "CRM API running"}

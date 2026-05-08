@@ -5,6 +5,10 @@ from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
+SECRET_KEY = "supersecretkey"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
 security = HTTPBearer()
 
 
@@ -18,18 +22,11 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
-SECRET_KEY = "supersecretkey"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-
-# ✅ CREATE TOKEN
 def create_access_token(data: dict):
     to_encode = data.copy()
 
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
 
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-    return encoded_jwt
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

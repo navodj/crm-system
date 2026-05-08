@@ -1,7 +1,13 @@
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 from app.auth import create_access_token
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
+
+# ✅ request body model
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 # ✅ hardcoded user
 fake_user = {
@@ -9,16 +15,13 @@ fake_user = {
     "password": "password123"
 }
 
-
 @router.post("/login")
-def login(email: str, password: str):
+def login(data: LoginRequest):
 
-    # ✅ check credentials
-    if email != fake_user["email"] or password != fake_user["password"]:
+    if data.email != fake_user["email"] or data.password != fake_user["password"]:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    # ✅ create token
-    token = create_access_token({"sub": email})
+    token = create_access_token({"sub": data.email})
 
     return {
         "access_token": token,
